@@ -6,8 +6,9 @@ import seaborn
 
 def generateVariableSets(dataframe1, dataframe2, pearson_thresholds = -1, cutoff_values = -1, variables = -1, verbose = False):
 
+    #print()
     if pearson_thresholds == -1:
-        pearson_thresholds = set(numpy.arange(0.1, 1.0, 0.5))
+        pearson_thresholds = set(numpy.around(numpy.arange(0.1, 1.0, 0.05), decimals=2))
     else:
         pearson_thresholds = set(pearson_thresholds)
 
@@ -62,7 +63,13 @@ def generateVariableSets(dataframe1, dataframe2, pearson_thresholds = -1, cutoff
 
 
     if verbose:
-        print('Normalized distributions in both samples:')
+
+        print('All variables sorted by separation:')
+        for sep, var in zip(separation, variables):
+            print([sep, var])
+        print()
+        print()
+
 
         f, ax = plt.subplots(figsize=(20,20))
         nrows = math.floor(math.sqrt(len(variables)))
@@ -73,12 +80,6 @@ def generateVariableSets(dataframe1, dataframe2, pearson_thresholds = -1, cutoff
             seaborn.distplot(data1[variable], kde=False, norm_hist = True).set_title(variable)
             seaborn.distplot(data2[variable], kde=False, norm_hist = True).set_title(variable)
 
-
-        print('All variables sorted by separation:')
-        for sep, var in zip(separation, variables):
-            print([sep, var])
-        print()
-        print()
 
         mask = numpy.triu(numpy.ones_like(correlation_matrix1, dtype=numpy.bool))
         cmap = seaborn.diverging_palette(10, 220, as_cmap=True)
@@ -136,6 +137,7 @@ def generateVariableSets(dataframe1, dataframe2, pearson_thresholds = -1, cutoff
     output['variable sets'].sort(key=lambda x: x['number of variables'], reverse=True)
 
     if verbose:
+        print('Generated ' + str(len(output['variable sets'])) + ' variable sets.')
         print(output)
 
     return output
@@ -150,7 +152,7 @@ def printVariableSets(variable_sets):
     print()
     print()
 
-    print('Variable sets:')
+    print('Variable sets (' + str(len(variable_sets['variable sets'])) + '):')
     print()
     for varset in variable_sets['variable sets']:
         print(['pearson threshold', varset['pearson threshold']])
