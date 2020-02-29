@@ -62,6 +62,18 @@ def generateVariableSets(dataframe1, dataframe2, pearson_thresholds = -1, cutoff
 
 
     if verbose:
+        print('Normalized distributions in both samples:')
+
+        f, ax = plt.subplots(figsize=(20,20))
+        nrows = math.floor(math.sqrt(len(variables)))
+        ncols = math.ceil(len(variables) / nrows)
+
+        for index, variable in enumerate(variables):
+            f.add_subplot(nrows, ncols, index + 1)
+            seaborn.distplot(data1[variable], kde=False, norm_hist = True).set_title(variable)
+            seaborn.distplot(data2[variable], kde=False, norm_hist = True).set_title(variable)
+
+
         print('All variables sorted by separation:')
         for sep, var in zip(separation, variables):
             print([sep, var])
