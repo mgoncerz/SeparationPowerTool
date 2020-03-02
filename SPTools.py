@@ -3,6 +3,8 @@ import numpy
 import matplotlib.pyplot as plt
 import seaborn
 
+import pandas
+
 
 def generateVariableSets(dataframe1, dataframe2, pearson_thresholds = -1, cutoff_values = -1, variables = -1, verbose = False):
 
@@ -191,3 +193,19 @@ def addCustomVariableSet(variable_sets, name, variables):
             mask[index] = True
 
     variable_sets['custom sets'].append({'name' : name, 'number of variables' : numpy.sum(mask), 'mask' : mask})
+
+
+def testVariableSets(dataframe1, dataframe2, variable_sets, verbose=True):
+
+    X1 = pandas.DataFrame(data=dataframe1)
+    Y1 = pandas.DataFrame(data=numpy.ones(X1.shape[0]))
+
+    X2 = pandas.DataFrame(data=dataframe2)
+    Y2 = pandas.DataFrame(data=numpy.zeros(X2.shape[0]))
+
+    X = X1.append(X2, ignore_index=True)
+    Y = Y1.append(Y2, ignore_index=True)
+
+    if verbose:
+        print(X)
+        print(Y)
