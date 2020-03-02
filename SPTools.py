@@ -97,7 +97,8 @@ def generateVariableSets(dataframe1, dataframe2, pearson_thresholds = -1, cutoff
     output = {
         'variable names' : variables,
         'separation values' : separation,
-        'variable sets' : []
+        'variable sets' : [],
+        'custom sets' : []
     }
 
     output['variable sets'].append({'pearson threshold' : 1.0, 'cutoff value' : 0, 'number of variables' : len(variables), 'mask' : numpy.ones_like(variables, dtype=bool)})
@@ -165,3 +166,28 @@ def printVariableSets(variable_sets):
         print()
         print()
         print()
+
+    if variable_sets['custom sets']:
+        print('Custom sets (' + str(len(variable_sets['custom sets'])) + '):')
+        print()
+        for varset in variable_sets['custom sets']:
+            print(['name', varset['name']])
+            print(['number of variables', varset['number of variables']])
+            print(['variables:'])
+            for index, mask_value in enumerate(varset['mask']):
+                if mask_value:
+                    print([variable_sets['separation values'][index], variable_sets['variable names'][index]])
+            print()
+            print()
+            print()
+
+def addCustomVariableSet(variable_sets, name, variables):
+
+    mask = numpy.zeros_like(variable_sets['variable names'], dtype=bool)
+
+    for index, variable in enumerate(variable_sets['variable names']):
+
+        if variable in variables:
+            mask[index] = True
+
+    variable_sets['custom sets'].append({'name' : name, 'number of variables' : numpy.sum(mask), 'mask' : mask})
