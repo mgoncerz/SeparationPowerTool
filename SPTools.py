@@ -5,6 +5,15 @@ import seaborn
 
 import pandas
 
+#from sklearn.model_selection import train_test_split
+#from sklearn.metrics import roc_curve, confusion_matrix
+
+#from tensorflow import keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras import backend as K
+
 
 def generateVariableSets(dataframe1, dataframe2, pearson_thresholds = -1, cutoff_values = -1, variables = -1, verbose = False):
 
@@ -209,3 +218,45 @@ def testVariableSets(dataframe1, dataframe2, variable_sets, verbose=True):
     if verbose:
         print(X)
         print(Y)
+
+
+    def testSet(X, Y, varset, verbose):
+
+        metrics = {}
+
+        X_train, X_test, Y_train, Y_test = train_test_split(X[:, varset['mask']], Y, test_size=0.2, shuffle=True)
+
+        model = Sequential()
+        model.add(Dense(64, activation='relu', input_dim = varset['number of variables']))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dense(1, activation='sigmoid'))
+        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+        callback = [EarlyStopping(monitor='val_loss', patience=3)]
+
+        history = model.fit(X_train, Y_train, validation_data = (X_test, Y_test), epochs=50, batch_size=256, callbacks=callback, verbose=verbose)
+  
+        metrics['accuracy'] = history.history['val_acc'][-5]
+        metrics['loss'] = history.history['val_loss'][-5]
+
+        predicted = model.predict(X_test)
+
+        metrics['roc'] = roc_curve(Y_test, predicted)
+        metrics['confusion matrix'] = confusion_matrix(Y_test, predicted, normalize = 'all')
+
+        #true positives + true negatives normalized to event number
+        metrics['classification accuracy'] = confusion_matrix[1][1] + confusion_matrix[0][0]
+
+        #metrics['model purity'] = ()
+
+        varset['metrics'] = metrics
+
+        K.clear_session()
+
+    for varset in variable_sets['variable sets']:
+        testSet(X, Y, varset, verbose)
+
+    for varset in variable_sets['custom sets']:
+        testSet(X, Y, varset, verbose)
+
